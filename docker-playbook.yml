@@ -1,0 +1,36 @@
+- hosts: allserver
+
+  vars:
+  - myimage: dipacode90/nginx-apps
+
+  tasks:
+  - name: install python-docker di ubuntu
+    apt:
+      name: "{{ item }}"
+      state: present
+    loop:
+      - python3
+      - python3-pip
+      - python3-docker
+    when: ansible_distribution == "Ubuntu"
+
+  - name: install python-docker centos
+    yum:
+      name: "{{ item }}"
+      state: present
+    loop:
+      - epel-release
+      - python3
+      - python3-docker
+    when: ansible_distribution == "CentOS"
+
+  - name: create container
+    docker_container:
+      name: ct-ansible
+      image: "{{ myimage }}"
+      pull: yes
+      recreate: yes
+      restart_policy: always
+      state: started
+      ports:
+        - "8008:80"
